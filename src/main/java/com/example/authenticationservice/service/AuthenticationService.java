@@ -1,5 +1,7 @@
 package com.example.authenticationservice.service;
 
+import com.example.authenticationservice.exception.NullWrapperException;
+import com.example.authenticationservice.exception.UserNotFoundException;
 import com.example.authenticationservice.models.AuthRequest;
 import com.example.authenticationservice.models.UserDTO;
 
@@ -28,29 +30,45 @@ public class AuthenticationService {
     @Autowired RestTemplate restTemplate;
 
     public String jwtFromAuthRequest(AuthRequest authRequest) {
-        try {
-            var user =
-                    restTemplate.postForObject(
-                            "http://user-resource/user/authenticate", authRequest, UserDTO.class);
 
-            var grantListWrapper =
-                    restTemplate.getForObject(
-                            "http://acl-resource/acl/grant/findbyuser/" + user.getId(),
-                            GrantListWrapper.class);
+        var user = fetchUser(authRequest);
 
-            var userDetail = new User();
-            userDetail.setName(String.valueOf(user.getId()));
-            userDetail.setPassword(user.getPassword());
-            userDetail.setRoles(grantListWrapper.getGrantList());
+        var grantListWrapper = fetchGrantListWrapper(user.getId());
 
-            return restTemplate.postForObject(
-                    "http://jwt-resource/jwt/encode", userDetail, String.class);
+        var userDetail = new User();
+        userDetail.setName(String.valueOf(user.getId()));
+        userDetail.setPassword(user.getPassword());
+        userDetail.setRoles(grantListWrapper.getGrantList());
 
-        } catch (Exception e) {
-            log.error("errore a leggere", e);
-            // TODO: qualcosa di più sensato
-            return null;
+        return restTemplate.postForObject(
+                "http://jwt-resource/jwt/encode", userDetail, String.class);
+    }
+
+    private UserDTO fetchUser(AuthRequest authRequest) {
+        var user =
+                restTemplate.postForObject(
+                        "http://user-resource/user/authenticate", authRequest, UserDTO.class);
+        if (user == null) {
+            var message =
+                    String.format(
+                            "user not found with email %s and password %s",
+                            authRequest.getEmail(), authRequest.getPassword());
+            log.error(message);
+            throw new UserNotFoundException(message);
         }
-        // da JWT restituisci il jwt
+        return user;
+    }
+
+    private GrantListWrapper fetchGrantListWrapper(Long userId) {
+        var grantListWrapper =
+                restTemplate.getForObject(
+                        "http://acl-resource/acl/grant/findbyuser/" + userId,
+                        GrantListWrapper.class);
+        if (grantListWrapper == null) {
+            var message = String.format("grantListWrapper was empty for user with id %d", userId);
+            log.error(message);
+            throw new NullWrapperException(message);
+        }
+        return grantListWrapper;
     }
 }
