@@ -7,7 +7,6 @@ import com.example.authenticationservice.models.UserDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +23,6 @@ class GrantListWrapper implements Serializable {
     private List<String> grantList;
 }
 
-@Log4j2
 @Service
 public class AuthenticationService {
     @Value("${com.example.user-resource.location}")
@@ -39,7 +37,7 @@ public class AuthenticationService {
     @Autowired RestTemplate restTemplate;
 
     public String jwtFromAuthRequest(AuthRequest authRequest) {
-        log.info(aclResourceEndpoint);
+        // log.info(aclResourceEndpoint);
 
         var user = fetchUser(authRequest);
 
@@ -63,7 +61,7 @@ public class AuthenticationService {
                     String.format(
                             "user not found with email %s and password %s",
                             authRequest.getEmail(), authRequest.getPassword());
-            log.error(message);
+            // log.error(message);
             throw new UserNotFoundException(message);
         }
         return user;
@@ -76,7 +74,7 @@ public class AuthenticationService {
                         GrantListWrapper.class);
         if (grantListWrapper == null) {
             var message = String.format("grantListWrapper was empty for user with id %d", userId);
-            log.error(message);
+            // log.error(message);
             throw new NullWrapperException(message);
         }
         return grantListWrapper;
