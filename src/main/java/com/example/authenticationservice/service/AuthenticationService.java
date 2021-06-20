@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -26,10 +27,19 @@ class GrantListWrapper implements Serializable {
 @Log4j2
 @Service
 public class AuthenticationService {
+    @Value("${com.example.user-resource.location}")
+    private String userResourceEndpoint;
+
+    @Value("${com.example.jwt-resource.location}")
+    private String jwtResourceEndpoint;
+
+    @Value("${com.example.acl-resource.location}")
+    private String aclResourceEndpoint;
 
     @Autowired RestTemplate restTemplate;
 
     public String jwtFromAuthRequest(AuthRequest authRequest) {
+        log.info(aclResourceEndpoint);
 
         var user = fetchUser(authRequest);
 
@@ -41,13 +51,13 @@ public class AuthenticationService {
         userDetail.setRoles(grantListWrapper.getGrantList());
 
         return restTemplate.postForObject(
-                "http://jwt-resource/jwt/encode", userDetail, String.class);
+                jwtResourceEndpoint + "/jwt/encode", userDetail, String.class);
     }
 
     private UserDTO fetchUser(AuthRequest authRequest) {
         var user =
                 restTemplate.postForObject(
-                        "http://user-resource/user/authenticate", authRequest, UserDTO.class);
+                        userResourceEndpoint + "/user/authenticate", authRequest, UserDTO.class);
         if (user == null) {
             var message =
                     String.format(
@@ -62,7 +72,7 @@ public class AuthenticationService {
     private GrantListWrapper fetchGrantListWrapper(Long userId) {
         var grantListWrapper =
                 restTemplate.getForObject(
-                        "http://acl-resource/acl/grant/findbyuser/" + userId,
+                        aclResourceEndpoint + "/acl/grant/findbyuser/" + userId,
                         GrantListWrapper.class);
         if (grantListWrapper == null) {
             var message = String.format("grantListWrapper was empty for user with id %d", userId);

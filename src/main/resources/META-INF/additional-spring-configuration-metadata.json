@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "com.example.user-resource.location",
+    "type": "java.lang.String",
+    "description": "the http location for user-resource"
+  },
+  {
+    "name": "com.example.acl-resource.location",
+    "type": "java.lang.String",
+    "description": "the http location for acl-resource"
+  },
+  {
+    "name": "com.example.jwt-resource.location",
+    "type": "java.lang.String",
+    "description": "the http location for jwt-resource"
+  }
+]}
