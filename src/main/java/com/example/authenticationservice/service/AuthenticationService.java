@@ -3,25 +3,14 @@ package com.example.authenticationservice.service;
 import com.example.authenticationservice.exception.NullWrapperException;
 import com.example.authenticationservice.exception.UserNotFoundException;
 import com.example.authenticationservice.models.AuthRequest;
+import com.example.authenticationservice.models.GrantListWrapper;
 import com.example.authenticationservice.models.UserDTO;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.Serializable;
-import java.util.List;
-
-@Data
-@NoArgsConstructor
-class GrantListWrapper implements Serializable {
-    private List<String> grantList;
-}
 
 @Service
 public class AuthenticationService {

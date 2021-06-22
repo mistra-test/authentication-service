@@ -1,10 +1,12 @@
 package com.example.authenticationservice.models;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
 public class UserDTO implements Serializable {
 
     private Long id;
