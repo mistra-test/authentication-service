@@ -35,7 +35,6 @@ metadata:
 spec:
   selector:
     app: authentication-service
-  type: LoadBalancer
   ports:
     - protocol: TCP
       port: 8080
